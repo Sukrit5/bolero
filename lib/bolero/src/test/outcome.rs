@@ -31,6 +31,11 @@ pub struct Outcome<'a> {
     exhaustive_input: u64,
     total: u64,
     exit_reason: Option<ExitReason>,
+    features: serde_json::Value,
+    arguments: serde_json::Value,
+    coverage: serde_json::Value,
+    representation: String,
+    json_time: std::time::Duration,
 }
 
 impl fmt::Display for Outcome<'_> {
