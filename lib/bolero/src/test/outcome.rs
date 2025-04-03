@@ -124,6 +124,61 @@ impl<'a> Outcome<'a> {
     pub fn on_exit(&mut self, reason: ExitReason) {
         self.exit_reason = Some(reason);
     }
+    pub fn output_json(&self) -> std::io::Result<()>{
+        let status = match &self.exit_reason {
+            Some(ExitReason::TestFailure) => "failed",
+            Some(ExitReason::MaxDurationExceeded { .. }) => "timed out",
+            None => "passed",
+        };
+
+        let status_reason = match &self.exit_reason {
+            Some(reason) => reason.to_string(),
+            None => String::new(),
+        };
+
+        let property = self.location.test_name.as_ref()
+            .map(|s| s.to_string())
+            .unwrap_or_else(|| self.location.item_path.to_string());
+
+        let how_generated = if self.corpus_input > 0 {
+            "loaded from corpus"
+        } else if self.rng_input > 0 {
+            "generated during unknown phase"
+        } else {
+            "unknown"
+        };
+
+        let metadata = json!({
+            "traceback": null
+        });
+
+        let output = json!({
+            "type": "test_case",
+            "run_start": self.json_time.as_secs(),
+            "property": property,
+            "status": status,
+            "status_reason": status_reason,
+            "representation": self.representation,
+            "arguments": self.arguments,
+            "how_generated": how_generated,
+            "features": self.features,
+            "metadata": metadata,
+            "coverage": self.coverage
+        });
+        let output_string = output.to_string();
+        let filename = "tyche_test.jsonl";
+        let file = std::fs::OpenOptions::new()
+        .create(true)
+        .append(true)
+        .open(filename)?;
+        
+        let mut buffered_writer = std::io::BufWriter::new(file);
+        writeln!(buffered_writer, "{}", output_string);
+        buffered_writer.flush();
+        Ok(())
+
+    }
+}
 }
 
 impl Drop for Outcome<'_> {
