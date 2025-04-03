@@ -124,6 +124,15 @@ impl<'a> Outcome<'a> {
     pub fn on_exit(&mut self, reason: ExitReason) {
         self.exit_reason = Some(reason);
     }
+    pub fn set_representation(&mut self, representation: String) {
+        self.representation = representation;
+    }
+    pub fn set_features(&mut self, features: Option<HashMap<String, String>>) {
+        self.features = match features {
+            None => json!({}),
+            Some(map) => serde_json::json!(map),
+        };
+    }
     pub fn output_json(&self) -> std::io::Result<()>{
         let status = match &self.exit_reason {
             Some(ExitReason::TestFailure) => "failed",
@@ -179,7 +188,7 @@ impl<'a> Outcome<'a> {
 
     }
 }
-}
+
 
 impl Drop for Outcome<'_> {
     fn drop(&mut self) {
