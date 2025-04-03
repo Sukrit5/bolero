@@ -85,9 +85,17 @@ impl<'a> Outcome<'a> {
             rng_input: 0,
             exhaustive_input: 0,
             total: 0,
+            representation: String::new(),
             exit_reason: None,
+            features: json!({}),
+            arguments: json!({}),
+            coverage: json!({}),
+            json_time: SystemTime::now()
+                .duration_since(UNIX_EPOCH)
+                .expect("Time went backwards"),
         }
     }
+
 
     pub fn on_named_test(&mut self, test: &super::input::Test) {
         match test {
