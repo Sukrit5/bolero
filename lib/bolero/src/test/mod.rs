@@ -8,6 +8,7 @@ use core::{fmt, mem::size_of, time::Duration};
 use std::path::PathBuf;
 
 type ExhastiveDriver = Box<Object<exhaustive::Driver>>;
+mod outcome;
 
 mod input;
 mod report;
